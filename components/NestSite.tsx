@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { APP_STORE_URL } from "../lib/links";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -100,10 +101,19 @@ const FAQS = [
     a: "Milestones follow the CDC's 2022 “Learn the Signs. Act Early.” checklists; feeding and sleep norms come from the AAP, CDC, NHS and AASM; growth curves are the WHO standards. Written plainly, never alarmist.",
   },
   {
-    q: "When can I get it?",
-    a: "Nest is finishing App Store review preparations now. It launches free on iPhone — no waitlist games, it will simply appear here.",
+    q: "Where do I get it?",
+    a: "It's out now — free on the App Store for iPhone (iOS 18 or later). No waitlist, no sign-up: download it and start logging tonight.",
   },
 ];
+
+function AppStoreLink({ children }: { children: React.ReactNode }) {
+  return (
+    <a className="badge" href={APP_STORE_URL}>
+      <img src="/media/app-icon.png" alt="" />
+      {children}
+    </a>
+  );
+}
 
 export default function NestSite() {
   const root = useRef<HTMLDivElement>(null);
@@ -313,11 +323,8 @@ export default function NestSite() {
             version of you, and shared with the people who help.
           </p>
           <div className="hero-cta">
-            <span className="badge">
-              <img src="/media/app-icon.png" alt="" />
-              Coming soon to the App Store
-            </span>
-            <span className="free-line muted">iPhone · iOS 18+</span>
+            <AppStoreLink>Download on the App Store</AppStoreLink>
+            <span className="free-line muted">Free · iPhone · iOS 18+</span>
           </div>
         </div>
         <div className="hero-phone-col">
@@ -529,9 +536,9 @@ export default function NestSite() {
 
       {/* ————— HATCHING ————— */}
       <section className="hatch wrap">
-        <p className="eyebrow rise">Almost here</p>
+        <p className="eyebrow rise">Out now</p>
         <h2 className="display rise" style={{ marginTop: "0.8rem" }}>
-          Hatching soon on the App Store.
+          Hatched. Nest is on the App Store.
         </h2>
         <div className="hatch-video rise">
           <video
@@ -543,6 +550,9 @@ export default function NestSite() {
             preload="none"
             aria-label="A felt egg cracks open and Pip peeks out"
           />
+        </div>
+        <div className="hatch-cta rise">
+          <AppStoreLink>Get Nest free</AppStoreLink>
         </div>
       </section>
 

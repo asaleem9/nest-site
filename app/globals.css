@@ -201,8 +201,13 @@ img, video { display: block; max-width: 100%; }
   font-weight: 600;
   font-size: 0.95rem;
   letter-spacing: 0.01em;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 .badge img { width: 22px; height: 22px; border-radius: 6px; }
+a.badge:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+@media (prefers-reduced-motion: no-preference) {
+  a.badge:hover { transform: translateY(-1px); box-shadow: 0 10px 24px -12px rgba(28, 33, 48, 0.6); }
+}
 .free-line {
   font-size: 0.9rem;
   font-weight: 600;
@@ -396,6 +401,7 @@ img, video { display: block; max-width: 100%; }
   text-align: center;
 }
 .hatch .display { font-size: clamp(2rem, 4.6vw, 3.4rem); }
+.hatch-cta { margin-top: 2rem; display: flex; justify-content: center; }
 .hatch-video {
   margin: 2.5rem auto 0;
   max-width: min(420px, 84vw);
