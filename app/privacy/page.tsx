@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+const title = "Privacy — Nest";
+const description = "Nest collects nothing. Your baby's data stays on your phone and in your own iCloud.";
+
 export const metadata: Metadata = {
-  title: "Privacy — Nest",
-  description: "Nest collects nothing. Your baby's data stays on your phone and in your own iCloud.",
+  title,
+  description,
+  alternates: { canonical: "/privacy" },
+  openGraph: { title, description, url: "/privacy", type: "website", images: ["/media/og.png"] },
 };
 
 export default function Privacy() {
@@ -23,7 +28,8 @@ export default function Privacy() {
           Everything you log — feeds, sleep, diapers, growth, medicine, milk stash,
           milestones, your baby&apos;s profile and photo — is stored in a database on
           your device. If your phone is signed into iCloud, that database syncs
-          through <strong>your own iCloud account</strong> using Apple&apos;s CloudKit,
+          through <strong>your own iCloud account</strong>{" "}
+          using Apple&apos;s CloudKit,
           so your data follows you to a new phone. We operate no servers of our own,
           and we could not read your data if we wanted to: it lives in your private
           iCloud database, which Apple encrypts and which is accessible only to your
@@ -55,7 +61,7 @@ export default function Privacy() {
       <section>
         <h2>Deleting your data</h2>
         <p>
-          Profile → Privacy &amp; data → &quot;Erase all data…&quot; deletes everything —
+          More → Privacy &amp; data → &quot;Erase all data…&quot; deletes everything —
           from the device and from your iCloud database. Deleting the app removes the
           local copy; the iCloud copy can also be removed from iOS Settings → your
           name → iCloud → Manage Account Storage.

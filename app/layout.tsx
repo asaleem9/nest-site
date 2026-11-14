@@ -23,6 +23,8 @@ export const metadata: Metadata = {
     title: "Nest — the calmest baby tracker ever made",
     description:
       "Free forever. No ads. No accounts. The baby tracker that respects your night.",
+    url: "/",
+    type: "website",
     images: ["/media/og.png"],
   },
 };

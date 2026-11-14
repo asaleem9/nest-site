@@ -148,13 +148,15 @@ export default function NestSite() {
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
+      const motionOK = window.matchMedia("(prefers-reduced-motion: no-preference)").matches;
 
+      // Reduced motion still swaps the screen, but leaves it on its poster.
       const activate = (index: number) => {
         videoRefs.current.forEach((v, i) => {
           if (!v) return;
           if (i === index) {
             v.classList.add("on");
-            v.play().catch(() => {});
+            if (motionOK) v.play().catch(() => {});
           } else {
             v.classList.remove("on");
             v.pause();
@@ -176,56 +178,66 @@ export default function NestSite() {
         });
       }
 
-      // Act → phone screen wiring (all motion modes; opacity handled by CSS).
-      gsap.utils.toArray<HTMLElement>(".act").forEach((act, i) => {
-        ScrollTrigger.create({
-          trigger: act,
-          start: "top 60%",
-          end: "bottom 40%",
-          onToggle: (self) => self.isActive && activate(i),
+      // Act → sticky phone screen wiring (all motion modes; opacity handled by
+      // CSS). Under 900px the sticky phone is gone and each act carries its own.
+      mm.add("(min-width: 901px)", () => {
+        gsap.utils.toArray<HTMLElement>(".act").forEach((act, i) => {
+          ScrollTrigger.create({
+            trigger: act,
+            start: "top 60%",
+            end: "bottom 40%",
+            onToggle: (self) => self.isActive && activate(i),
+          });
         });
+        activate(0);
+        return () => videoRefs.current.forEach((v) => v?.pause());
       });
-      activate(0);
+
+      const playWhileOnScreen = (v: HTMLVideoElement) => {
+        ScrollTrigger.create({
+          trigger: v,
+          start: "top 85%",
+          end: "bottom 15%",
+          onToggle: (self) => {
+            if (self.isActive) v.play().catch(() => {});
+            else v.pause();
+          },
+        });
+      };
+
+      // Scroll reveals start hidden only if they are still below the fold, so
+      // nothing already on screen blinks out; the rest fades up on arrival.
+      const revealOnArrival = (selector: string, start: string, y: number, duration: number, stagger: number) => {
+        const waiting = gsap.utils
+          .toArray<HTMLElement>(selector)
+          .filter((el) => el.getBoundingClientRect().top > window.innerHeight);
+        if (!waiting.length) return;
+        gsap.set(waiting, { opacity: 0, y });
+        ScrollTrigger.batch(waiting, {
+          // clamp(): on a very tall window the last ones never climb this
+          // high, so the end of the page counts as arriving.
+          start: `clamp(${start})`,
+          once: true,
+          onEnter: (els) =>
+            gsap.to(els, { opacity: 1, y: 0, duration, ease: "power2.out", stagger, overwrite: true }),
+        });
+      };
+
+      mm.add("(max-width: 900px) and (prefers-reduced-motion: no-preference)", () => {
+        const clips = gsap.utils.toArray<HTMLVideoElement>(".act-clip");
+        clips.forEach(playWhileOnScreen);
+        return () => clips.forEach((v) => v.pause());
+      });
 
       mm.add("(prefers-reduced-motion: no-preference)", () => {
         // Felt vignettes play only while on screen; the hatching clip has no
         // loop attribute, so it plays once and freezes on the reveal.
-        gsap.utils.toArray<HTMLVideoElement>(".ambient-clip").forEach((v) => {
-          ScrollTrigger.create({
-            trigger: v,
-            start: "top 85%",
-            end: "bottom 15%",
-            onToggle: (self) => {
-              if (self.isActive) v.play().catch(() => {});
-              else v.pause();
-            },
-          });
-        });
+        gsap.utils.toArray<HTMLVideoElement>(".ambient-clip").forEach(playWhileOnScreen);
 
-        // Hero words rise from their clipping lines.
-        gsap.from(".hero h1 .word", {
-          yPercent: 135,
-          duration: 1.1,
-          ease: "power4.out",
-          stagger: 0.06,
-          delay: 0.15,
-        });
-        gsap.from(".hero-sub, .hero-cta", {
-          opacity: 0,
-          y: 24,
-          duration: 0.9,
-          ease: "power2.out",
-          stagger: 0.12,
-          delay: 0.7,
-        });
-        gsap.from(".hero .phone", {
-          y: 90,
-          rotate: 6,
-          opacity: 0,
-          duration: 1.3,
-          ease: "power3.out",
-          delay: 0.35,
-        });
+        // The hero entrance itself is CSS (globals.css) so it starts with the
+        // first paint. The screen recording only plays when motion is welcome.
+        root.current?.querySelector<HTMLVideoElement>(".hero .phone video")?.play().catch(() => {});
+
         // Idle float, forever.
         gsap.to(".hero .phone", {
           y: -12,
@@ -238,12 +250,7 @@ export default function NestSite() {
         });
 
         // Manifesto strikes reveal.
-        ScrollTrigger.batch(".sin", {
-          start: "top 82%",
-          once: true,
-          onEnter: (els) =>
-            gsap.from(els, { opacity: 0, y: 40, duration: 0.8, ease: "power2.out", stagger: 0.12 }),
-        });
+        revealOnArrival(".sin", "top 82%", 40, 0.8, 0.12);
 
         // Acts phone gets a gentle tilt as each act passes.
         gsap.utils.toArray<HTMLElement>(".act").forEach((act, i) => {
@@ -279,12 +286,7 @@ export default function NestSite() {
           .to(".pip-stage .pip-img", { y: 0, duration: 0.18, ease: "bounce.out" }, 0.76);
 
         // Section headers ease up as they arrive.
-        ScrollTrigger.batch(".rise", {
-          start: "top 85%",
-          once: true,
-          onEnter: (els) =>
-            gsap.from(els, { opacity: 0, y: 34, duration: 0.9, ease: "power2.out", stagger: 0.08 }),
-        });
+        revealOnArrival(".rise", "top 85%", 34, 0.9, 0.08);
       });
 
       return () => {
@@ -332,7 +334,6 @@ export default function NestSite() {
             <video
               src="/media/today-live.mp4"
               poster="/media/today-live-poster.jpg"
-              autoPlay
               muted
               loop
               playsInline
@@ -383,6 +384,18 @@ export default function NestSite() {
           <div>
             {ACTS.map((act) => (
               <div className="act" key={act.id} data-act={act.id} data-accent={act.accent}>
+                <div className="phone act-phone">
+                  <video
+                    className="act-clip"
+                    src={act.video}
+                    poster={act.poster}
+                    muted
+                    loop
+                    playsInline
+                    preload="none"
+                    aria-label={act.title}
+                  />
+                </div>
                 <div className="act-copy">
                   <p className="eyebrow">{act.eyebrow}</p>
                   <h3>{act.title}</h3>
@@ -411,6 +424,7 @@ export default function NestSite() {
                   ref={(el) => {
                     videoRefs.current[i] = el;
                   }}
+                  className={i === 0 ? "on" : undefined}
                   src={act.video}
                   poster={act.poster}
                   muted

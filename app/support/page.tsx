@@ -2,10 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import ContactForm from "@/components/ContactForm";
 
+const title = "Support — Nest";
+const description =
+  "How to reach us, plus answers to the questions parents ask most about Nest — the free, private baby tracker.";
+
 export const metadata: Metadata = {
-  title: "Support — Nest",
-  description:
-    "How to reach us, plus answers to the questions parents ask most about Nest — the free, private baby tracker.",
+  title,
+  description,
+  alternates: { canonical: "/support" },
+  openGraph: { title, description, url: "/support", type: "website", images: ["/media/og.png"] },
 };
 
 const FAQS = [
@@ -35,7 +40,7 @@ const FAQS = [
   },
   {
     q: "How do I erase everything?",
-    a: "Profile → Privacy & data → “Erase all data…” removes every entry from your device and from your iCloud database, and returns the app to a fresh start.",
+    a: "More → Privacy & data → “Erase all data…” removes every entry from your device and from your iCloud database, and returns the app to a fresh start.",
   },
   {
     q: "Which devices does Nest support?",
